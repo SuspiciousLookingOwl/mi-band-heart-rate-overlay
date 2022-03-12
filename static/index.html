@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Mi Band Heart Rate Monitor Overlay</title>
+	<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+	<link href="http://fonts.cdnfonts.com/css/seven-segment" rel="stylesheet">
+
+	<style>
+		body {
+			margin: 0;
+			width: 100vw;
+			height: 100vh;
+		}
+
+		.container {
+			box-sizing: border-box;
+			position: relative;
+			background-color: rgba(0, 0, 0, 0.95);
+			padding: 32px 16px 0px 8px;
+			width: 100%;
+			height: 100%;
+		}
+
+		.label {
+			font-family: "Seven Segment", sans-serif;
+			position: absolute;
+			font-weight: 700;
+			font-size: 64px;
+			color: #13FE16;
+			background-color: rgba(0, 0, 0, 0.25);
+			padding: 8px 16px;
+			margin-top: 4px;
+			margin-left: 96px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="label">
+			BPM: <span id="labelValue"></span>
+		</div>
+		<div id="chart"></div>
+	</div>
+
+	<script>
+		const params = new URLSearchParams(window.location.search);
+		const labelValue = document.getElementById("labelValue");
+
+		const interval = +params.get("interval") || 2;
+		const dataLength = (60 / interval);
+		const labelStyle = {
+			colors: "#ffffff",
+			fontSize: "32px",
+		};
+		const strokeStyle = {
+			curve: "straight",
+			width: 3,
+			colors: "#13FE16"
+		}
+
+		const data = [...Array(dataLength)].map(() => 0);
+		const fetchData = async () => {
+			const response = await fetch("http://localhost:27893/heart-rate")
+			const { heartRate } = await response.json();
+			data.push(heartRate);
+			data.shift();
+			labelValue.innerText = heartRate;
+			chart.updateSeries([{ data }])
+		}
+
+		const options = {
+			series: [{ data }],
+			chart: {
+				id: "realtime",
+				type: "line",
+				toolbar: { show: false },
+				zoom: { enabled: false },
+				animations: { enabled: false },
+				width: "98%",
+				height: "98%",
+			},
+			dataLabels: { enabled: false },
+			stroke: strokeStyle,
+			grid: { show: false },
+			markers: { size: 0 },
+			tooltip: { enabled: false },
+			xaxis: {
+				categories: [...Array(dataLength)].map((_, i) => (60 - interval) - (i * interval)),
+				labels: {
+					style: labelStyle,
+					rotate: 0,
+					offsetY: 8,
+					formatter: (v) => v % 10 === 0 ? `${v}s` : ""
+				},
+				axisTicks: { show: false },
+			},
+			yaxis: {
+				max: (v) => Math.max(v, 150),
+				min: 0,
+				labels: {
+					style: labelStyle,
+					offsetX: -4,
+					formatter: (v) => v % 30 === 0 ? v : "",
+				},
+			},
+			legend: { show: false },
+		};
+
+		const chart = new ApexCharts(document.querySelector("#chart"), options);
+		chart.render();
+		fetchData();
+		window.setInterval(fetchData, interval * 1000)
+	</script>
+
+</body>
+
+</html>
