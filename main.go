@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 var latestHeartRate int = 0
@@ -39,6 +40,7 @@ func retrieveHeartRate(c echo.Context) error {
 
 func main() {
 	e := echo.New()
+	e.Use(middleware.CORS())
 	e.HideBanner = true
 
 	e.Static("/", "static")
