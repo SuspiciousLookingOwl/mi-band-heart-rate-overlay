@@ -52,7 +52,9 @@
 		const labelValue = document.getElementById("labelValue");
 
 		const interval = +params.get("interval") || 2;
-		const dataLength = (60 / interval);
+		const duration = +params.get("duration") || 60;
+		const timeLabelCount = +params.get("timeLabelCount") || 6;
+		const dataLength = (duration / interval);
 		const labelStyle = {
 			colors: "#ffffff",
 			fontSize: "32px",
@@ -90,12 +92,12 @@
 			markers: { size: 0 },
 			tooltip: { enabled: false },
 			xaxis: {
-				categories: [...Array(dataLength)].map((_, i) => (60 - interval) - (i * interval)),
+				categories: [...Array(dataLength)].map((_, i) => (duration - interval) - (i * interval)),
 				labels: {
 					style: labelStyle,
 					rotate: 0,
 					offsetY: 8,
-					formatter: (v) => v % 10 === 0 ? `${v}s` : ""
+					formatter: (v) => v % (duration / timeLabelCount) === 0 ? `${v}s` : ""
 				},
 				axisTicks: { show: false },
 			},
