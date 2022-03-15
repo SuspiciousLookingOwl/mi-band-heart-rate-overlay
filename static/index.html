@@ -28,13 +28,24 @@
 		.label {
 			font-family: "Seven Segment", sans-serif;
 			position: absolute;
-			font-weight: 700;
-			font-size: 64px;
-			color: #13FE16;
+			display: flex;
+			flex-direction: column;
 			background-color: rgba(0, 0, 0, 0.25);
 			padding: 8px 16px;
 			margin-top: 4px;
 			margin-left: 96px;
+		}
+
+		.bpm {
+			font-weight: 700;
+			font-size: 64px;
+			color: #13FE16;
+		}
+
+		.last-update {
+			font-weight: 700;
+			font-size: 36px;
+			color: #13FE16;
 		}
 	</style>
 </head>
@@ -42,18 +53,22 @@
 <body>
 	<div class="container">
 		<div class="label">
-			BPM: <span id="labelValue"></span>
+			<div class="bpm">BPM: <span id="labelElement"></span></div>
+			<div class="last-update" id="lastUpdateElement"></div>
 		</div>
 		<div id="chart"></div>
 	</div>
 
 	<script>
 		const params = new URLSearchParams(window.location.search);
-		const labelValue = document.getElementById("labelValue");
+		const labelElement = document.getElementById("labelElement");
+		const lastUpdateElement = document.getElementById("lastUpdateElement");
 
 		const interval = +params.get("interval") || 2;
 		const duration = +params.get("duration") || 60;
+		const lastUpdate = params.get("lastUpdate") === "true";
 		const timeLabelCount = +params.get("timeLabelCount") || 6;
+
 		const dataLength = (duration / interval);
 		const labelStyle = {
 			colors: "#ffffff",
@@ -68,10 +83,15 @@
 		const data = [...Array(dataLength)].map(() => 0);
 		const fetchData = async () => {
 			const response = await fetch("http://localhost:27893/heart-rate")
-			const { heartRate } = await response.json();
+			const { heartRate, timestamp } = await response.json();
 			data.push(heartRate);
 			data.shift();
-			labelValue.innerText = heartRate;
+			labelElement.innerText = heartRate;
+			if (lastUpdate) {
+				const secondsSinceLastUpdate = Math.round((Date.now() - new Date(timestamp).getTime()) / 1000);
+				lastUpdateElement.innerText = `${secondsSinceLastUpdate} sec ago`
+			}
+
 			chart.updateSeries([{ data }])
 		}
 
