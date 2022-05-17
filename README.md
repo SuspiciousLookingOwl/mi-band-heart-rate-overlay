@@ -27,7 +27,7 @@
 
 ##### OBS:
 
-1. Add `Browser` source, with URL value: `https://suspiciouslookingowl.github.io/mi-band-heart-rate-overlay/static`
+1. Add `Browser` source, with URL value: [`https://suspiciouslookingowl.github.io/mi-band-heart-rate-overlay/static`](https://suspiciouslookingowl.github.io/mi-band-heart-rate-overlay/static)
 2. Input the width and height value, recommended values are `1200` and `600` respectively
 
 ---
